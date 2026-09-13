@@ -31,6 +31,7 @@
   // INITIALIZATION
   // ==========================================================================
   document.addEventListener('DOMContentLoaded', () => {
+    initPasscode();
     loadDataFromStorage();
     initDateControls();
     initExpenseForm();
@@ -57,6 +58,42 @@
   function parseDateKey(key) {
     const [y, m, d] = key.split('-').map(Number);
     return new Date(y, m - 1, d);
+  }
+
+  // ==========================================================================
+  // PASSCODE LOCK SCREEN VERIFICATION
+  // ==========================================================================
+  function initPasscode() {
+    const passcodeOverlay = document.getElementById('passcodeOverlay');
+    const passcodeForm = document.getElementById('passcodeForm');
+    const passcodeInput = document.getElementById('passcodeInput');
+    const passcodeError = document.getElementById('passcodeError');
+
+    if (!passcodeOverlay) return;
+
+    function attemptUnlock() {
+      const pinVal = passcodeInput.value.trim();
+      if (pinVal === '0000') {
+        passcodeOverlay.classList.add('unlocked');
+        passcodeError.classList.add('hidden');
+      } else {
+        passcodeError.classList.remove('hidden');
+        passcodeInput.value = '';
+        passcodeInput.focus();
+      }
+    }
+
+    passcodeForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      attemptUnlock();
+    });
+
+    passcodeInput.addEventListener('input', () => {
+      passcodeError.classList.add('hidden');
+      if (passcodeInput.value.length === 4) {
+        attemptUnlock();
+      }
+    });
   }
 
   // ==========================================================================
@@ -205,7 +242,7 @@
 
       renderExpenses();
       renderStats();
-      showToast(`Added expense: $${amountVal.toFixed(2)}`);
+      showToast(`Added expense: ₹${amountVal.toFixed(2)}`);
     });
   }
 
@@ -229,7 +266,7 @@
       itemEl.innerHTML = `
         <div class="expense-item-note">${escapeHtml(item.note)}</div>
         <div class="expense-item-actions">
-          <span class="expense-item-amount">$${parseFloat(item.amount).toFixed(2)}</span>
+          <span class="expense-item-amount">₹${parseFloat(item.amount).toFixed(2)}</span>
           <button class="btn-delete-item" data-id="${item.id}" title="Delete expense">&times;</button>
         </div>
       `;
@@ -532,7 +569,7 @@
 
     // Prepare CSV Header Columns
     const habitTitles = habitTemplates.map(h => h.title);
-    const headers = ['Date', 'Total Expenses ($)', 'Expense Details', 'Habits Completed', ...habitTitles];
+    const headers = ['Date', 'Total Expenses (₹)', 'Expense Details', 'Habits Completed', ...habitTitles];
 
     const csvRows = [];
     csvRows.push(headers.map(escapeCsvValue).join(','));
@@ -544,7 +581,7 @@
 
       // Calculate Total Expense & Notes
       const totalExpense = expensesList.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-      const expenseNotes = expensesList.map(e => `${e.note} ($${parseFloat(e.amount).toFixed(2)})`).join('; ');
+      const expenseNotes = expensesList.map(e => `${e.note} (₹${parseFloat(e.amount).toFixed(2)})`).join('; ');
 
       // Count Habits
       let completedHabitCount = 0;

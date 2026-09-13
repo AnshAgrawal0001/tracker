@@ -21,6 +21,27 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Passcode Lock Screen Overlay -->
+  <div id="passcodeOverlay" class="passcode-overlay">
+    <div class="passcode-card glass-card">
+      <div class="passcode-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <h2>Enter Passcode</h2>
+      <p class="passcode-subtitle">Enter 4-digit PIN to access Daily Tracker</p>
+      
+      <form id="passcodeForm" class="passcode-form">
+        <input type="password" id="passcodeInput" maxlength="4" placeholder="••••" pattern="[0-9]*" inputmode="numeric" autofocus required autocomplete="off">
+        <button type="submit" class="btn btn-primary btn-block">Unlock</button>
+      </form>
+      
+      <div id="passcodeError" class="passcode-error hidden">Incorrect Passcode (Hint: 0000)</div>
+    </div>
+  </div>
+
   <div class="app-container">
     <!-- Header -->
     <header class="app-header">
@@ -38,7 +59,6 @@
       </div>
 
       <div class="header-actions">
-
 
         <button id="exportExcelBtn" class="btn btn-secondary btn-sm" title="Export all data to Excel CSV">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -89,14 +109,14 @@
           </div>
         </div>
         <div class="expense-total-badge" id="dayExpenseTotalBadge">
-          <span class="currency-symbol">$</span>
+          <span class="currency-symbol">₹</span>
           <span id="dayExpenseTotal">0.00</span>
         </div>
       </div>
 
       <form id="expenseForm" class="expense-form">
         <div class="input-group amount-group">
-          <span class="input-prefix">$</span>
+          <span class="input-prefix">₹</span>
           <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00" required inputmode="decimal">
         </div>
 
@@ -156,7 +176,7 @@
         <div class="stat-box">
           <span class="stat-label">7-Day Expenses</span>
           <div class="stat-value text-emerald">
-            $<span id="weeklyExpenseTotal">0.00</span>
+            ₹<span id="weeklyExpenseTotal">0.00</span>
           </div>
           <span class="stat-subtext">Total logged</span>
         </div>
