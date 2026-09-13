@@ -9,8 +9,8 @@
 
   <!-- PWA Manifest & Icons -->
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +38,7 @@
       </div>
 
       <div class="header-actions">
-        <button id="pwaInstallBtn" class="btn btn-primary btn-sm hidden">
+        <button id="pwaInstallBtn" class="btn btn-primary btn-sm">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>Install App</span>
         </button>
@@ -187,6 +187,30 @@
         <div class="habits-manage-list" id="habitsManageList">
           <!-- Habit template items rendered here -->
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PWA Install Guide Modal (Android Chrome / OnePlus Nord 4 Support) -->
+  <div id="installGuideModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Install PWA on Mobile</h3>
+        <button id="closeInstallGuideModal" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="install-guide-steps">
+          <p>To install this app on Chrome (Android / OnePlus Nord 4):</p>
+          <ol style="margin-left: 20px; display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+            <li>Tap the <strong>3 dots (⋮)</strong> menu in top-right corner of Chrome.</li>
+            <li>Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>.</li>
+            <li>Confirm by tapping <strong>Install</strong>.</li>
+          </ol>
+          <p style="margin-top: 12px; font-size: 0.8rem; color: var(--text-muted);">
+            Once installed, the app works 100% offline like a native Android app from your home screen.
+          </p>
+        </div>
+        <button id="gotItInstallBtn" class="btn btn-primary btn-sm" style="margin-top: 12px;">Got it!</button>
       </div>
     </div>
   </div>
