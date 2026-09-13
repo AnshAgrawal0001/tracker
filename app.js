@@ -656,7 +656,7 @@
   }
 
   // ==========================================================================
-  // PWA REGISTRATION & INSTALL PROMPT
+  // PWA SERVICE WORKER REGISTRATION
   // ==========================================================================
   function initPWA() {
     if ('serviceWorker' in navigator) {
@@ -664,38 +664,6 @@
         navigator.serviceWorker.register('./sw.js', { scope: './' })
           .then((reg) => console.log('[PWA] Service Worker registered scope:', reg.scope))
           .catch((err) => console.log('[PWA] Service Worker registration failed:', err));
-      });
-    }
-
-    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-    const installGuideModal = document.getElementById('installGuideModal');
-    const closeInstallGuideModal = document.getElementById('closeInstallGuideModal');
-    const gotItInstallBtn = document.getElementById('gotItInstallBtn');
-
-    if (closeInstallGuideModal) {
-      closeInstallGuideModal.addEventListener('click', () => installGuideModal.classList.add('hidden'));
-    }
-    if (gotItInstallBtn) {
-      gotItInstallBtn.addEventListener('click', () => installGuideModal.classList.add('hidden'));
-    }
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredInstallPrompt = e;
-      if (pwaInstallBtn) pwaInstallBtn.classList.remove('hidden');
-    });
-
-    if (pwaInstallBtn) {
-      pwaInstallBtn.addEventListener('click', async () => {
-        if (deferredInstallPrompt) {
-          deferredInstallPrompt.prompt();
-          const { outcome } = await deferredInstallPrompt.userChoice;
-          console.log('[PWA] User response to install prompt:', outcome);
-          deferredInstallPrompt = null;
-        } else {
-          // If prompt event hasn't fired or user is on Android Chrome, show step-by-step installation guide
-          installGuideModal.classList.remove('hidden');
-        }
       });
     }
   }
