@@ -14,11 +14,10 @@
 
   // Default Habit Templates
   const DEFAULT_HABITS = [
-    { id: 'h_1', emoji: '💪', title: 'Exercise 30 mins' },
-    { id: 'h_2', emoji: '💧', title: 'Drink 2L Water' },
-    { id: 'h_3', emoji: '📖', title: 'Read 15 Pages' },
-    { id: 'h_4', emoji: '🧘', title: 'Meditation 10 mins' },
-    { id: 'h_5', emoji: '😴', title: '7+ Hours Sleep' }
+    { id: 'h_1', emoji: '💧', title: 'Drink 3L Water' },
+    { id: 'h_2', emoji: '👟', title: 'Walk 10k Steps' },
+    { id: 'h_3', emoji: '🥗', title: 'No Junk / Outside Food', allowStreakFreeze: true },
+    { id: 'h_4', emoji: '🏋️', title: 'Workout / Exercise' }
   ];
 
   // App State Variables
@@ -73,7 +72,7 @@
 
     function attemptUnlock() {
       const pinVal = passcodeInput.value.trim();
-      if (pinVal === '0000') {
+      if (pinVal === '9999') {
         passcodeOverlay.classList.add('unlocked');
         passcodeError.classList.add('hidden');
       } else {
@@ -318,6 +317,17 @@
       if (isCompleted) completedCount++;
 
       const streak = calculateHabitStreak(habit.id);
+      const isFreezeHabit = habit.allowStreakFreeze || habit.title.toLowerCase().includes('no junk');
+      const earnedShields = Math.floor(streak / 7);
+
+      let shieldHtml = '';
+      if (isFreezeHabit) {
+        if (earnedShields > 0) {
+          shieldHtml = `<span class="shield-badge" title="7-day streak reward: 1 Cheat Day allowed without breaking streak">🛡️ ${earnedShields} Cheat Shield</span>`;
+        } else {
+          shieldHtml = `<span class="shield-badge-muted" title="Complete a 7-day streak to earn 1 Cheat Day shield!">🛡️ 7d = 1 Cheat Shield</span>`;
+        }
+      }
 
       const card = document.createElement('div');
       card.className = `habit-card ${isCompleted ? 'completed' : ''}`;
@@ -334,7 +344,10 @@
           <span class="habit-emoji">${habit.emoji || '✨'}</span>
           <span class="habit-title">${escapeHtml(habit.title)}</span>
         </div>
-        ${streak > 0 ? `<div class="habit-streak">🔥 ${streak}d</div>` : ''}
+        <div class="habit-badges">
+          ${shieldHtml}
+          ${streak > 0 ? `<div class="habit-streak">🔥 ${streak}d</div>` : ''}
+        </div>
       `;
 
       card.addEventListener('click', () => {
@@ -366,14 +379,28 @@
     barEl.style.width = `${percentage}%`;
   }
 
-  // Streak Calculation (consecutive days completed up to current selected date / today)
+  // Streak Calculation with Streak Freeze / Cheat Shield Support
   function calculateHabitStreak(habitId) {
+    const habitObj = habitTemplates.find(h => h.id === habitId);
+    const allowFreeze = habitObj && (habitObj.allowStreakFreeze || habitObj.title.toLowerCase().includes('no junk'));
+
     let streak = 0;
+    let earnedShields = 0;
     let checkDate = parseDateKey(selectedDate);
 
     while (true) {
       const dateKey = formatDateKey(checkDate);
-      if (dailyLogs[dateKey] && dailyLogs[dateKey].habits && dailyLogs[dateKey].habits[habitId]) {
+      const isDone = dailyLogs[dateKey] && dailyLogs[dateKey].habits && dailyLogs[dateKey].habits[habitId];
+
+      if (isDone) {
+        streak++;
+        if (allowFreeze && streak % 7 === 0) {
+          earnedShields++;
+        }
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else if (allowFreeze && earnedShields > 0) {
+        // Protect streak using earned cheat day shield
+        earnedShields--;
         streak++;
         checkDate.setDate(checkDate.getDate() - 1);
       } else {
