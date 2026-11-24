@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Daily Habit & Expense Tracker PWA</title>
-  <meta name="description" content="Offline-first Progressive Web App to track daily habits and expenses with Excel export support.">
+  <meta name="description" content="Offline-first Progressive Web App to track daily habits, expenses, and evaluate actual product costs (ACE).">
   <meta name="theme-color" content="#4f46e5">
 
   <!-- PWA Manifest & Icons -->
@@ -38,35 +38,127 @@
         <button type="submit" class="btn btn-primary btn-block">Unlock</button>
       </form>
       
-      <div id="passcodeError" class="passcode-error hidden">Incorrect Passcode (Hint: 0000)</div>
+      <div id="passcodeError" class="passcode-error hidden">Incorrect Passcode (Hint: 0000 or 9999)</div>
     </div>
+  </div>
+
+  <!-- Navigation Drawer (Hamburger Menu) -->
+  <div id="navDrawerOverlay" class="nav-drawer-overlay hidden" aria-hidden="true">
+    <div class="nav-drawer-backdrop" id="navDrawerBackdrop"></div>
+    <nav class="nav-drawer" id="navDrawer" aria-label="Main Navigation">
+      <div class="drawer-header">
+        <div class="brand">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 11l3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h3>Tracker Pro</h3>
+            <span class="pwa-badge">Menu</span>
+          </div>
+        </div>
+        <button id="closeDrawerBtn" class="btn-close" aria-label="Close navigation">&times;</button>
+      </div>
+
+      <div class="drawer-body">
+        <div class="drawer-section-title">Navigation</div>
+        <ul class="nav-links">
+          <li>
+            <button class="nav-link active" data-page="daily" id="navLinkDaily">
+              <span class="nav-icon">📅</span>
+              <div class="nav-link-text">
+                <span class="nav-title">Daily Tracker</span>
+                <span class="nav-desc">Habits, streaks & expenses</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="nav-link" data-page="ace" id="navLinkAce">
+              <span class="nav-icon">⚖️</span>
+              <div class="nav-link-text">
+                <span class="nav-title">ACE (Cost Evaluator)</span>
+                <span class="nav-desc">Product ROI & savings payoff</span>
+              </div>
+              <span class="nav-chip" id="aceNavCountChip">0</span>
+            </button>
+          </li>
+        </ul>
+
+        <div class="drawer-section-title">Quick Actions</div>
+        <ul class="nav-links secondary-nav">
+          <li>
+            <button class="nav-link-action" id="drawerManageHabitsBtn">
+              <span class="nav-icon">✨</span>
+              <span>Manage Habit Templates</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-link-action" id="drawerExportCsvBtn">
+              <span class="nav-icon">📊</span>
+              <span>Export Excel CSV</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-link-action" id="drawerSettingsBtn">
+              <span class="nav-icon">⚙️</span>
+              <span>Settings & Backup</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="drawer-footer">
+        <div class="drawer-footer-info">
+          <span>Tracker PWA v2.2</span>
+          <span class="status-dot-active">● Offline Ready</span>
+        </div>
+      </div>
+    </nav>
   </div>
 
   <div class="app-container">
     <!-- Header -->
     <header class="app-header">
-      <div class="brand">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 11l3 3L22 4"></path>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+      <div class="header-left">
+        <button id="hamburgerBtn" class="btn btn-icon hamburger-btn" aria-label="Open menu" title="Open Navigation Menu">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
           </svg>
-        </div>
-        <div class="brand-text">
-          <h1>Daily Tracker</h1>
-          <span class="pwa-badge">Offline Ready</span>
+        </button>
+
+        <div class="brand">
+          <div class="logo-icon" id="brandLogoIcon">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 11l3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1 id="headerPageTitle">Daily Tracker</h1>
+            <span class="pwa-badge" id="headerSubtitleBadge">Offline Ready</span>
+          </div>
         </div>
       </div>
 
       <div class="header-actions">
-
-        <button id="exportExcelBtn" class="btn btn-secondary btn-sm" title="Export all data to Excel CSV">
+        <!-- Daily Tracker Action Buttons -->
+        <button id="exportExcelBtn" class="btn btn-secondary btn-sm header-action-daily" title="Export all data to Excel CSV">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           <span class="desktop-only">Export Excel</span>
         </button>
 
-        <button id="manageHabitsBtn" class="btn btn-icon" title="Manage Habit Templates">
+        <button id="manageHabitsBtn" class="btn btn-icon header-action-daily" title="Manage Habit Templates">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </button>
+
+        <!-- ACE Page Action Buttons -->
+        <button id="addAceProductTopBtn" class="btn btn-primary btn-sm header-action-ace hidden" title="Add New Product">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Add Product</span>
         </button>
 
         <button id="settingsBtn" class="btn btn-icon" title="Settings & Data Management">
@@ -75,113 +167,182 @@
       </div>
     </header>
 
-    <!-- Date Navigation Banner -->
-    <section class="date-navigator-card">
-      <button id="prevDateBtn" class="date-nav-btn" aria-label="Previous day">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-
-      <div class="date-picker-wrapper">
-        <div class="date-display" id="dateDisplay">
-          <span id="dateDayName">Today</span>
-          <h2 id="dateFormatted">Sep 14, 2026</h2>
-        </div>
-        <input type="date" id="hiddenDatePicker" class="hidden-date-picker" title="Pick Date">
-      </div>
-
-      <button id="nextDateBtn" class="date-nav-btn" aria-label="Next day">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-
-      <button id="todayBtn" class="btn btn-ghost btn-xs">Today</button>
-    </section>
-
-    <!-- Daily Expense Logger Card -->
-    <section class="expense-card glass-card">
-      <div class="card-header">
-        <div class="card-title">
-          <div class="card-icon expense-icon">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <div>
-            <h3>Daily Expenses</h3>
-            <p class="subtitle">Log today's spending in seconds</p>
-          </div>
-        </div>
-        <div class="expense-total-badge" id="dayExpenseTotalBadge">
-          <span class="currency-symbol">₹</span>
-          <span id="dayExpenseTotal">0.00</span>
-        </div>
-      </div>
-
-      <form id="expenseForm" class="expense-form">
-        <div class="input-group amount-group">
-          <span class="input-prefix">₹</span>
-          <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00" required inputmode="decimal">
-        </div>
-
-        <div class="input-group note-group">
-          <input type="text" id="expenseNote" placeholder="Category or note (e.g. Groceries, Coffee)">
-        </div>
-
-        <button type="submit" class="btn btn-accent">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span>Add Expense</span>
+    <!-- ====================================================================
+         PAGE 1: DAILY TRACKER (HABITS & DAILY EXPENSES)
+         ==================================================================== -->
+    <main id="pageDaily" class="page-view active">
+      <!-- Date Navigation Banner -->
+      <section class="date-navigator-card">
+        <button id="prevDateBtn" class="date-nav-btn" aria-label="Previous day">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-      </form>
 
-      <!-- Today's Expense Entries List -->
-      <div id="expenseEntriesContainer" class="expense-entries-container">
-        <!-- Dynamic content logged here -->
-      </div>
-    </section>
-
-    <!-- Daily Habits Checklist Section -->
-    <section class="habits-section">
-      <div class="section-header">
-        <div class="header-info">
-          <h2>Daily Habits</h2>
-          <span class="progress-counter" id="habitProgressCounter">0 of 0 Completed</span>
-        </div>
-        
-        <div class="progress-bar-container">
-          <div id="habitProgressBar" class="progress-bar-fill" style="width: 0%;"></div>
-        </div>
-      </div>
-
-      <div id="habitsList" class="habits-list">
-        <!-- Dynamic habits rendered here -->
-      </div>
-    </section>
-
-    <!-- Analytics & Stats Drawer / Cards -->
-    <section class="dashboard-stats glass-card">
-      <div class="stats-grid">
-        <div class="stat-box">
-          <span class="stat-label">Active Streak</span>
-          <div class="stat-value text-fire">
-            <span id="currentStreak">0</span> <small>days</small>
+        <div class="date-picker-wrapper">
+          <div class="date-display" id="dateDisplay">
+            <span id="dateDayName">Today</span>
+            <h2 id="dateFormatted">Sep 14, 2026</h2>
           </div>
-          <span class="stat-subtext">Perfect days</span>
+          <input type="date" id="hiddenDatePicker" class="hidden-date-picker" title="Pick Date">
         </div>
 
-        <div class="stat-box">
-          <span class="stat-label">7-Day Completion</span>
-          <div class="stat-value text-primary">
-            <span id="weeklyHabitRate">0%</span>
+        <button id="nextDateBtn" class="date-nav-btn" aria-label="Next day">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+
+        <button id="todayBtn" class="btn btn-ghost btn-xs">Today</button>
+      </section>
+
+      <!-- Daily Expense Logger Card -->
+      <section class="expense-card glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-icon expense-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div>
+              <h3>Daily Expenses</h3>
+              <p class="subtitle">Log today's spending in seconds</p>
+            </div>
           </div>
-          <span class="stat-subtext">Habits completed</span>
+          <div class="expense-total-badge" id="dayExpenseTotalBadge">
+            <span class="currency-symbol">₹</span>
+            <span id="dayExpenseTotal">0.00</span>
+          </div>
         </div>
 
-        <div class="stat-box">
-          <span class="stat-label">7-Day Expenses</span>
-          <div class="stat-value text-emerald">
-            ₹<span id="weeklyExpenseTotal">0.00</span>
+        <form id="expenseForm" class="expense-form">
+          <div class="input-group amount-group">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00" required inputmode="decimal">
           </div>
-          <span class="stat-subtext">Total logged</span>
+
+          <div class="input-group note-group">
+            <input type="text" id="expenseNote" placeholder="Category or note (e.g. Groceries, Coffee)">
+          </div>
+
+          <button type="submit" class="btn btn-accent">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Add Expense</span>
+          </button>
+        </form>
+
+        <!-- Today's Expense Entries List -->
+        <div id="expenseEntriesContainer" class="expense-entries-container">
+          <!-- Dynamic content logged here -->
         </div>
-      </div>
-    </section>
+      </section>
+
+      <!-- Daily Habits Checklist Section -->
+      <section class="habits-section">
+        <div class="section-header">
+          <div class="header-info">
+            <h2>Daily Habits</h2>
+            <span class="progress-counter" id="habitProgressCounter">0 of 0 Completed</span>
+          </div>
+          
+          <div class="progress-bar-container">
+            <div id="habitProgressBar" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div id="habitsList" class="habits-list">
+          <!-- Dynamic habits rendered here -->
+        </div>
+      </section>
+
+      <!-- Analytics & Stats Drawer / Cards -->
+      <section class="dashboard-stats glass-card">
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">Active Streak</span>
+            <div class="stat-value text-fire">
+              <span id="currentStreak">0</span> <small>days</small>
+            </div>
+            <span class="stat-subtext">Perfect days</span>
+          </div>
+
+          <div class="stat-box">
+            <span class="stat-label">7-Day Completion</span>
+            <div class="stat-value text-primary">
+              <span id="weeklyHabitRate">0%</span>
+            </div>
+            <span class="stat-subtext">Habits completed</span>
+          </div>
+
+          <div class="stat-box">
+            <span class="stat-label">7-Day Expenses</span>
+            <div class="stat-value text-emerald">
+              ₹<span id="weeklyExpenseTotal">0.00</span>
+            </div>
+            <span class="stat-subtext">Total logged</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ====================================================================
+         PAGE 2: ACE (ACTUAL COST EVALUATOR)
+         ==================================================================== -->
+    <main id="pageAce" class="page-view hidden">
+      <!-- ACE Overview Stats Banner -->
+      <section class="ace-summary-card glass-card">
+        <div class="ace-summary-header">
+          <div class="card-title">
+            <div class="card-icon ace-summary-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div>
+              <h3>Actual Cost Evaluator (ACE)</h3>
+              <p class="subtitle">Track investment payoff, savings & actual cost</p>
+            </div>
+          </div>
+          <button id="addAceProductBtn" class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>+ Add Product</span>
+          </button>
+        </div>
+
+        <div class="stats-grid ace-stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">Total Invested</span>
+            <div class="stat-value">
+              ₹<span id="aceTotalInvested">0</span>
+            </div>
+            <span class="stat-subtext">Initial + Extra Costs</span>
+          </div>
+
+          <div class="stat-box">
+            <span class="stat-label">Total Recovered</span>
+            <div class="stat-value text-emerald">
+              ₹<span id="aceTotalSavings">0</span>
+            </div>
+            <span class="stat-subtext">Cumulative Savings (-)</span>
+          </div>
+
+          <div class="stat-box">
+            <span class="stat-label" id="aceNetLabel">Net Balance</span>
+            <div class="stat-value" id="aceNetValue">
+              ₹0
+            </div>
+            <span class="stat-subtext" id="aceNetSubtext">Outstanding / Profit</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filter Controls & Header -->
+      <section class="ace-filter-bar">
+        <div class="ace-tabs">
+          <button class="ace-filter-btn active" data-filter="all">All Products (<span id="aceFilterAllCount">0</span>)</button>
+          <button class="ace-filter-btn" data-filter="pending">Pending Recovery (<span id="aceFilterPendingCount">0</span>)</button>
+          <button class="ace-filter-btn" data-filter="recovered">Fully Recovered (<span id="aceFilterRecoveredCount">0</span>)</button>
+        </div>
+      </section>
+
+      <!-- ACE Products List -->
+      <section id="aceProductsList" class="ace-products-list">
+        <!-- Products dynamically rendered here -->
+      </section>
+    </main>
   </div>
 
   <!-- Manage Habits Modal -->
@@ -208,7 +369,105 @@
     </div>
   </div>
 
+  <!-- Add/Edit ACE Product Modal -->
+  <div id="aceProductModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="aceProductModalTitle">Add New Product for ACE</h3>
+        <button id="closeAceProductModal" class="btn-close">&times;</button>
+      </div>
 
+      <div class="modal-body">
+        <form id="aceProductForm" class="ace-form">
+          <input type="hidden" id="aceProductId">
+          
+          <div class="form-group">
+            <label for="aceProductName">Product Name *</label>
+            <div class="input-row">
+              <input type="text" id="aceProductEmoji" class="emoji-input" placeholder="🚲" maxlength="4" value="🚲" title="Pick an Emoji icon">
+              <input type="text" id="aceProductName" placeholder="e.g. Bicycle, Coffee Maker, Kindle" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="aceProductInitialCost">Initial Purchase Cost (₹) *</label>
+            <div class="input-group amount-group">
+              <span class="input-prefix">₹</span>
+              <input type="number" id="aceProductInitialCost" step="0.01" min="0" placeholder="7300" required inputmode="decimal">
+            </div>
+            <small class="form-help-text">How much you paid to buy this product.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="aceProductBenchmark">Savings Benchmark / Purpose (Optional)</label>
+            <input type="text" id="aceProductBenchmark" placeholder="e.g. Commute to office - saves ₹80 per Rapido ride">
+            <small class="form-help-text">Reminder of how this product generates daily or weekly savings.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="aceProductDate">Purchase Date</label>
+            <input type="date" id="aceProductDate">
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" id="cancelAceProductBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACE Log Transaction Modal (+ Extra Cost OR - Saving) -->
+  <div id="aceLogModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="aceLogModalTitle">Log Entry</h3>
+        <button id="closeAceLogModal" class="btn-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div id="aceLogProductBanner" class="ace-log-product-banner">
+          <span id="aceLogProductEmoji">🚲</span>
+          <div>
+            <div id="aceLogProductName" class="product-banner-title">Bicycle</div>
+            <div id="aceLogProductStatus" class="product-banner-subtitle">Outstanding: ₹7,300.00</div>
+          </div>
+        </div>
+
+        <form id="aceLogForm" class="ace-form">
+          <input type="hidden" id="aceLogProductId">
+          <input type="hidden" id="aceLogType"> <!-- 'cost' or 'saving' -->
+
+          <div class="form-group">
+            <label id="aceLogAmountLabel" for="aceLogAmount">Amount (₹) *</label>
+            <div class="input-group amount-group">
+              <span class="input-prefix">₹</span>
+              <input type="number" id="aceLogAmount" step="0.01" min="0.01" placeholder="0.00" required inputmode="decimal" autofocus>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label id="aceLogNoteLabel" for="aceLogNote">Description / Reason *</label>
+            <input type="text" id="aceLogNote" placeholder="e.g. Rapido commute saved" required>
+            <div class="quick-preset-chips" id="aceLogPresetChips">
+              <!-- Quick presets auto-inserted -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="aceLogDate">Date</label>
+            <input type="date" id="aceLogDate">
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" id="cancelAceLogBtn">Cancel</button>
+            <button type="submit" class="btn" id="aceLogSubmitBtn">Confirm</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <!-- Settings & Data Modal -->
   <div id="settingsModal" class="modal-overlay hidden">
@@ -222,7 +481,7 @@
         <div class="setting-item">
           <div class="setting-text">
             <h4>Export Data for Excel</h4>
-            <p>Download complete historical habit & expense logs into an `.csv` spreadsheet file.</p>
+            <p>Download complete historical habit, expense, and ACE product logs into `.csv` spreadsheet files.</p>
           </div>
           <button id="modalExportCsvBtn" class="btn btn-secondary btn-sm">
             Download Excel CSV
@@ -232,7 +491,7 @@
         <div class="setting-item">
           <div class="setting-text">
             <h4>Backup Data (JSON)</h4>
-            <p>Save all habits and settings to a JSON file to transfer between devices.</p>
+            <p>Save all habits, logs, and ACE product evaluations into a JSON file to transfer between devices.</p>
           </div>
           <button id="exportJsonBtn" class="btn btn-ghost btn-sm">
             Export JSON
@@ -242,7 +501,7 @@
         <div class="setting-item">
           <div class="setting-text">
             <h4>Restore Data</h4>
-            <p>Restore your habits and historical logs from a previous JSON backup.</p>
+            <p>Restore your habits, historical logs, and ACE products from a previous JSON backup.</p>
           </div>
           <label class="btn btn-ghost btn-sm file-input-label">
             Import JSON
@@ -253,7 +512,7 @@
         <div class="setting-item danger-zone">
           <div class="setting-text">
             <h4 class="text-danger">Reset All Data</h4>
-            <p>Clear all local logs and restore default habit templates.</p>
+            <p>Clear all local logs, habits, and ACE product evaluations.</p>
           </div>
           <button id="clearDataBtn" class="btn btn-danger btn-sm">
             Reset Data
